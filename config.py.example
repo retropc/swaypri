@@ -1,0 +1,21 @@
+import proc
+import pwd
+
+FREERDP = "/usr/bin/xfreerdp"
+FIREFOX = "/usr/bin/firefox-bin"
+LIBVIRT_UID = pwd.getpwnam("libvirt-qemu").pw_uid
+
+def rdp():
+  for pid in proc.lookup_pid_from_exe(FREERDP):
+    yield pid, -5, 19
+  for pid in proc.lookup_pid_from_uid(LIBVIRT_UID):
+    yield pid, -5, 19
+
+def firefox():
+  for pid in proc.lookup_pid_from_exe(FIREFOX):
+    yield pid, -1, 5
+
+INTERESTING = {
+  FIREFOX: firefox,
+  FREERDP: rdp,
+}
