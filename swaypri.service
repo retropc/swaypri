@@ -1,0 +1,12 @@
+[Unit]
+Description=swaypri
+
+[Service]
+Type=simple
+WorkingDirectory=/home/blah/swaypri
+ExecStart=/home/blah/swaypri/swaypri -v
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=graphical-session.target

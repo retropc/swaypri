@@ -1,21 +1,27 @@
-import proc
 import pwd
 
-FREERDP = "/usr/bin/xfreerdp"
+import actions
+import proc
+
+NICER = "./nicer"
+
+VIRTVIEWER = "/usr/bin/virt-viewer"
 FIREFOX = "/usr/bin/firefox-bin"
 LIBVIRT_UID = pwd.getpwnam("libvirt-qemu").pw_uid
 
-def rdp():
-  for pid in proc.lookup_pid_from_exe(FREERDP):
-    yield pid, -5, 19
+def virtviewer():
+  for pid in proc.lookup_pid_from_exe(VIRTVIEWER):
+    yield actions.set_priority(pid, -5, 19)
   for pid in proc.lookup_pid_from_uid(LIBVIRT_UID):
-    yield pid, -5, 19
+    yield actions.set_priority(pid, -5, 19)
+
+  yield actions.set_vsched("myvm", 100000, 17592186044415, 20000, 1000)
 
 def firefox():
   for pid in proc.lookup_pid_from_exe(FIREFOX):
-    yield pid, -1, 5
+    yield actions.set_priority(pid, -1, 5)
 
 INTERESTING = {
   FIREFOX: firefox,
-  FREERDP: rdp,
+  VIRTVIEWER: virtviewer,
 }

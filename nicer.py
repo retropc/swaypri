@@ -1,6 +1,8 @@
-import subprocess
-import struct
 import os
+import struct
+import subprocess
+
+import config
 
 class Nicer:
   PACK_OUT = struct.Struct("=iii")
@@ -32,5 +34,5 @@ NICER = None
 def setpriority(which, who, priority):
   global NICER
   if NICER is None:
-    NICER = Nicer("./nicer")
+    NICER = Nicer(config.NICER)
   NICER.setpriority(which, who, priority)
