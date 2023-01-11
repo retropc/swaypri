@@ -7,6 +7,7 @@ WorkingDirectory=/home/blah/swaypri
 ExecStart=/home/blah/swaypri/swaypri -v
 Restart=always
 RestartSec=1
+KillSignal=SIGINT
 
 [Install]
 WantedBy=graphical-session.target

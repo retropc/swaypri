@@ -50,7 +50,14 @@ def main():
       fn(True)
     last = l
 
-  sway_loop(callback)
+  try:
+    sway_loop(callback)
+  except KeyboardInterrupt:
+    pass
+  finally:
+    for fn in config.INTERESTING.values():
+      for fn2 in fn():
+        fn2(True)
 
 if __name__ == "__main__":
   args = sys.argv[1:]

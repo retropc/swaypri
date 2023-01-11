@@ -8,26 +8,36 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <limits.h>
 
-int main(void) {
-  for(;;) {
-    int32_t values[3];
-
-    size_t expected = sizeof(values);
-    ssize_t r = read(0, &values, expected);
-    if (r != expected) {
-      return 1;
-    }
-
-    int32_t out;
-    if (setpriority(values[0], values[1], values[2]) == 0) {
-      out = 0;
-    } else {
-      out = errno;
-    }
-
-    if (write(1, &out, sizeof(out)) != sizeof(out)) {
-      return 2;
-    }
+static int conv(const char *v, int *out) {
+  char *p;
+  long l = strtol(v, &p, 10);
+  if (p == v) {
+    return 0;
   }
+  if ((l == LONG_MAX || l == LONG_MIN) && errno == ERANGE) {
+    return 0;
+  }
+
+  *out = l;
+  return 1;
+}
+
+int main(int argc, char *argv[]) {
+  if (argc != 4) {
+    return 255;
+  }
+
+  int which, pid, value;
+  if (!conv(argv[1], &which) || !conv(argv[2], &pid) || !conv(argv[3], &value)) {
+    return 255;
+  }
+
+  if (setpriority(which, pid, value) != 0) {
+    return errno;
+  }
+
+  return 0;
 }
