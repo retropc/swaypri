@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import time
 
 import config
 import proc
@@ -19,8 +20,9 @@ def sway_loop(callback):
       callback(c["app_id"], c["pid"])
 
 def main():
+  now = time.time()
   for fn in config.INTERESTING.values():
-    for fn2 in fn():
+    for fn2 in fn(now):
       fn2(False)
 
   last = None
@@ -32,10 +34,11 @@ def main():
       exe = proc.lookup_exe(pid)
 
     verbose("focus switch to", (name, pid, exe))
+    now = time.time()
 
     l, last = last, None
     if l:
-      for fn in l():
+      for fn in l(now):
         fn(False)
 
     if exe is None:
@@ -46,7 +49,7 @@ def main():
       return
 
     verbose("switched to", exe)
-    for fn in l():
+    for fn in l(now):
       fn(True)
     last = l
 
@@ -55,8 +58,9 @@ def main():
   except KeyboardInterrupt:
     pass
   finally:
+    now = time.time()
     for fn in config.INTERESTING.values():
-      for fn2 in fn():
+      for fn2 in fn(now):
         fn2(True)
 
 if __name__ == "__main__":

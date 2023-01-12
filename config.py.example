@@ -9,15 +9,25 @@ VIRTVIEWER = "/usr/bin/virt-viewer"
 FIREFOX = "/usr/bin/firefox-bin"
 LIBVIRT_UID = pwd.getpwnam("libvirt-qemu").pw_uid
 
-def virtviewer():
+VM_NAME = "myvm"
+
+def virtviewer(now):
   for pid in proc.lookup_pid_from_exe(VIRTVIEWER):
     yield actions.set_priority(pid, -5, 19)
-  for pid in proc.lookup_pid_from_uid(LIBVIRT_UID):
-    yield actions.set_priority(pid, -5, 19)
 
-  yield actions.set_vsched("myvm", 100000, 17592186044415, 20000, 1000)
+  throttle = True
+  for pid, s in proc.lookup_pid_from_uid(LIBVIRT_UID):
+    if now - s.st_mtime < 30:
+      throttle = False
+    yield actions.set_priority(pid, -5, 19 if throttle else 0)
 
-def firefox():
+  if throttle:
+    inactive_period, inactive_quota = 20000, 1000
+  else:
+    inactive_period, inactive_quota = 100000, 17592186044415
+  yield actions.set_vsched(VM_NAME, 100000, 17592186044415, inactive_period, inactive_quota)
+
+def firefox(now):
   for pid in proc.lookup_pid_from_exe(FIREFOX):
     yield actions.set_priority(pid, -1, 5)
 
